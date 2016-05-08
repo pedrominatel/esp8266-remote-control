@@ -2,15 +2,17 @@
 #include <DNSServer.h>
 #include <ESP8266WebServer.h>
 #include <WiFiManager.h>         //https://github.com/tzapu/WiFiManager
-
-
 #include <WebSocketsClient.h>
 #include <Hash.h>
 
 #define STATUS_PIN 13
+#define BTN 12
+#define LED 4
 
 WebSocketsClient webSocket;
 
+uint8_t btn_state = 0;
+uint8_t btn_last = 0;
 
 void webSocketEvent(WStype_t type, uint8_t * payload, size_t lenght) {
 
@@ -48,20 +50,43 @@ void setup() {
 
   Serial.begin(115200);
 
+  pinMode(LED, OUTPUT);
+  pinMode(BTN, INPUT);
+  digitalWrite(LED, LOW);
+
   pinMode(STATUS_PIN, OUTPUT);
   digitalWrite(STATUS_PIN, LOW);
 
+
+
   WiFiManager wifiManager;
   wifiManager.autoConnect("MyRemoteControl");
+  //wifiManager.resetSettings();
 
   Serial.println("Connected to the remote control server!");
   digitalWrite(STATUS_PIN, HIGH);
 
-  webSocket.begin("192.168.0.123", 81);
+  webSocket.begin("192.168.4.1", 81);
   webSocket.onEvent(webSocketEvent);
 
 }
 
 void loop() {
   webSocket.loop();
+
+  btn_state = digitalRead(BTN);
+
+  if(btn_state != btn_last){
+    if(btn_state == HIGH){
+      digitalWrite(LED, HIGH);
+      btn_last = HIGH;
+      Serial.printf("High\n");
+      webSocket.sendTXT("LED1_ON");
+    } else {
+      digitalWrite(LED, LOW);
+      btn_last = LOW;
+      Serial.printf("Low\n");
+      webSocket.sendTXT("LED1_OFF");
+    }
+  }
 }
