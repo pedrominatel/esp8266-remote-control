@@ -49,19 +49,19 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t lenght
 
 void command_handle(uint8_t *payload, size_t lenght) {
 
-  uint8_t io;
-  bool io_state;
-  String command;
-
-  command.toCharArray((char *)payload,8);
-
-  //GPIO12_1
-  //if (command.startsWith("GPIO")) {
-      //cmd.substring(4,6);
-      //cmd.substring(7,8);
-      Serial.println(command.substring(4,6));
-      Serial.println(command.substring(7,8));
-  //}
+  // uint8_t io;
+  // bool io_state;
+  // String command;
+  //
+  // command.toCharArray((char *)payload,8);
+  //
+  // //GPIO12_1
+  // //if (command.startsWith("GPIO")) {
+  //     //cmd.substring(4,6);
+  //     //cmd.substring(7,8);
+  //     Serial.println(command.substring(4,6));
+  //     Serial.println(command.substring(7,8));
+  // //}
 
 }
 
