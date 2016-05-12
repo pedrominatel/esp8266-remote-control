@@ -81,12 +81,12 @@ void loop() {
       digitalWrite(LED, HIGH);
       btn_last = HIGH;
       Serial.printf("High\n");
-      webSocket.sendTXT("LED1_ON");
+      webSocket.sendTXT("GPIO12_1");
     } else {
       digitalWrite(LED, LOW);
       btn_last = LOW;
       Serial.printf("Low\n");
-      webSocket.sendTXT("LED1_OFF");
+      webSocket.sendTXT("GPIO12_0");
     }
   }
 }
