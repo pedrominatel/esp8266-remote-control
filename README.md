@@ -1,6 +1,13 @@
 # ESP8266 Remote Control
 A dual ESP8266 remote control using socket communication
 
+  - Easy to use
+  - ...
+  - ...
+
+### Version
+0.0.1
+
 This project uses the platformIO build system!
 
 ### Dependencies
