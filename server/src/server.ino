@@ -8,8 +8,8 @@ WebSocketsServer webSocket = WebSocketsServer(81);
 const char *ssid = "RemoteControl";
 const char *password = "remotecontrol";
 
-#define STS_PIN 13
-#define GPIO12  12
+#define STS_PIN 4
+#define LED_0  5
 
 void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t lenght) {
 
@@ -23,46 +23,41 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t lenght
       IPAddress ip = webSocket.remoteIP(num);
       Serial.printf("[%u] Connected from %d.%d.%d.%d url: %s\n", num, ip[0], ip[1], ip[2], ip[3], payload);
       digitalWrite(STS_PIN, HIGH);
-      // send message to client
       webSocket.sendTXT(num, "Connected");
     }
     break;
     case WStype_TEXT:
-    Serial.printf("[%u] get Text: %s\n", num, payload);
-    command_handle(payload, lenght);
-    // send message to client
-    // webSocket.sendTXT(num, "message here");
-
-    // send data to all connected clients
-    // webSocket.broadcastTXT("message here");
+    Serial.printf("header: %d\n", payload[0]);
+    Serial.printf("gpio: %d\n", payload[1]);
+    Serial.printf("mode: %d\n", payload[2]);
+    Serial.printf("state: %d\n", payload[3]);
+    Serial.printf("footer: %d\n", payload[4]);
+    command_handle(payload);
     break;
     case WStype_BIN:
     Serial.printf("[%u] get binary lenght: %u\n", num, lenght);
     hexdump(payload, lenght);
-
-    // send message to client
-    // webSocket.sendBIN(num, payload, lenght);
     break;
   }
-
 }
 
-void command_handle(uint8_t *payload, size_t lenght) {
+void command_handle(uint8_t *payload) {
 
-  // uint8_t io;
-  // bool io_state;
-  // String command;
-  //
-  // command.toCharArray((char *)payload,8);
-  //
-  // //GPIO12_1
-  // //if (command.startsWith("GPIO")) {
-  //     //cmd.substring(4,6);
-  //     //cmd.substring(7,8);
-  //     Serial.println(command.substring(4,6));
-  //     Serial.println(command.substring(7,8));
-  // //}
+  if((payload[0]==0xaa) && (payload[4]==0x55)){
 
+    switch (payload[2]) {
+      case 0x00:
+        digitalWrite(payload[1], payload[3]);
+      break;
+      case 0x01:
+        //PWM
+      break;
+      default:
+      break;
+    }
+  } else {
+    Serial.printf("Invalid command");
+  }
 }
 
 void setup() {
@@ -70,16 +65,9 @@ void setup() {
   Serial.begin(115200);
 
   pinMode(STS_PIN, OUTPUT);
-  pinMode(GPIO12, OUTPUT);
-
+  pinMode(LED_0, OUTPUT);
   digitalWrite(STS_PIN, LOW);
-  digitalWrite(GPIO12, LOW);
-
-  for(uint8_t t = 4; t > 0; t--) {
-    Serial.printf("[SETUP] BOOT WAIT %d...\n", t);
-    Serial.flush();
-    delay(1000);
-  }
+  digitalWrite(LED_0, LOW);
 
   WiFi.softAP(ssid, password);
 

@@ -13,6 +13,7 @@ WebSocketsClient webSocket;
 
 uint8_t btn_state = 0;
 uint8_t btn_last = 0;
+uint8_t *socket_payload;
 
 void webSocketEvent(WStype_t type, uint8_t * payload, size_t lenght) {
 
@@ -24,26 +25,26 @@ void webSocketEvent(WStype_t type, uint8_t * payload, size_t lenght) {
         case WStype_CONNECTED:
             {
                 Serial.printf("[WSc] Connected to url: %s\n",  payload);
-
-			    // send message to server when Connected
 				webSocket.sendTXT("Connected");
             }
             break;
         case WStype_TEXT:
             Serial.printf("[WSc] get text: %s\n", payload);
-
-			// send message to server
-			// webSocket.sendTXT("message here");
             break;
         case WStype_BIN:
             Serial.printf("[WSc] get binary lenght: %u\n", lenght);
             hexdump(payload, lenght);
-
-            // send data to server
-            // webSocket.sendBIN(payload, lenght);
             break;
     }
+}
 
+uint8_t * build_payload(uint8_t *payload, uint8_t gpio, uint8_t mode, uint8_t state){
+  payload[0] = 0xaa;
+  payload[1] = gpio;
+  payload[2] = mode;
+  payload[3] = state;
+  payload[4] = 0x55;
+  return payload;
 }
 
 void setup() {
@@ -57,7 +58,7 @@ void setup() {
   pinMode(STATUS_PIN, OUTPUT);
   digitalWrite(STATUS_PIN, LOW);
 
-
+  socket_payload = (uint8_t*) calloc(5, sizeof(uint8_t));
 
   WiFiManager wifiManager;
   wifiManager.autoConnect("MyRemoteControl");
@@ -68,12 +69,9 @@ void setup() {
 
   webSocket.begin("192.168.4.1", 81);
   webSocket.onEvent(webSocketEvent);
-
 }
 
-void loop() {
-  webSocket.loop();
-
+void read_button(void) {
   btn_state = digitalRead(BTN);
 
   if(btn_state != btn_last){
@@ -81,12 +79,17 @@ void loop() {
       digitalWrite(LED, HIGH);
       btn_last = HIGH;
       Serial.printf("High\n");
-      webSocket.sendTXT("GPIO12_1");
+      webSocket.sendTXT(build_payload(socket_payload, 5, 0, 1),5);
     } else {
       digitalWrite(LED, LOW);
       btn_last = LOW;
       Serial.printf("Low\n");
-      webSocket.sendTXT("GPIO12_0");
+      webSocket.sendTXT(build_payload(socket_payload, 5, 0, 0),5);
     }
   }
+}
+
+void loop() {
+  webSocket.loop();
+  read_button();
 }
