@@ -8,7 +8,7 @@ A dual ESP8266 remote control using socket communication
 ### Version
 0.0.1
 
-This project uses the platformIO build system!
+This project uses the [platformIO](http://platformio.org) build system!
 
 ### Dependencies
 
