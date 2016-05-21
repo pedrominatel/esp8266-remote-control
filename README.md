@@ -24,7 +24,7 @@ $ platformio lib install 549
 $ platformio lib install 567
 ```
 
-### Todos
+### TODOs/Features to be implemented
 
  - Implement auto-config on server side
  - Implement PWM
